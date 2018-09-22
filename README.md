@@ -89,7 +89,7 @@ registerServiceWorker();
 importing firebase in you other components
 
 ```jsx
-import db from './../index.js';
+import db from './index.js';
 ```
 
 
