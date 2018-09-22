@@ -25,225 +25,73 @@ creact-react-app new-project
 ```
 ## Step-2
 
-Now install firebase in you react app
+Now go to your project directory & install firebase in you react app ,
 ```bash
+cd new-project
 npm install firebase --save
 ```
 
-## Use
+## Step-3
 
-Include `reactReduxFirebase` (store enhancer) and  `firebaseReducer` (reducer) while creating your redux store:
+Open `Firebase` and  get your project's config like ,
+```bash
+// Initialize Firebase
+  var config = {
+    apiKey: "XXXXXXXXXXXXX",
+    authDomain: "XXXXXXXXXXXXX",
+    databaseURL: "XXXXXXXXXXXXX",
+    projectId: "XXXXXXXXXXXXX",
+    storageBucket: "XXXXXXXXXXXXX",
+    messagingSenderId: "XXXXXXXXXXXXX"
+  };
+  firebase.initializeApp(config);
+  ```
+  
+## Step-4 -USE
 
+Open index.js and use these js
 ```javascript
-import React from 'react'
-import { render } from 'react-dom'
-import { Provider } from 'react-redux'
-import { createStore, combineReducers, compose } from 'redux'
-import { reactReduxFirebase, firebaseReducer } from 'react-redux-firebase'
-import firebase from 'firebase'
-// import { reduxFirestore, firestoreReducer } from 'redux-firestore' // <- needed if using firestore
-// import 'firebase/firestore' // <- needed if using firestore
-// import 'firebase/functions' // <- needed if using httpsCallable
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+import App from './App';
+import * as firebase from 'firebase';
+import registerServiceWorker from './registerServiceWorker';
 
-const firebaseConfig = {}
+// Initialize Firebase
+// paste your own configuration
+var config = {
+    apiKey: "XXXXXXXXXXXXX",
+    authDomain: "XXXXXXXXXXXXX",
+    databaseURL: "XXXXXXXXXXXXX",
+    projectId: "XXXXXXXXXXXXX",
+    storageBucket: "XXXXXXXXXXXXX",
+    messagingSenderId: "XXXXXXXXXXXXX"
+  };
+  firebase.initializeApp(config);
+  
+  const db = firebase.firestore();
+  const settings = {/* your settings... */ timestampsInSnapshots: true};
+  db.settings(settings);
+  
+  //export db from here for using it in all page like im using firestore so for acceccing firestore in all pages we use db , 
+  export default (db);
 
-// react-redux-firebase config
-const rrfConfig = {
-  userProfile: 'users',
-  // useFirestoreForProfile: true // Firestore for Profile instead of Realtime DB
-}
+ReactDOM.render(<App />, document.getElementById('root'));
+registerServiceWorker();
 
-// Initialize firebase instance
-firebase.initializeApp(firebaseConfig)
-
-// Initialize other services on firebase instance
-// firebase.firestore() // <- needed if using firestore
-// firebase.functions() // <- needed if using httpsCallable
-
-// Add reactReduxFirebase enhancer when making store creator
-const createStoreWithFirebase = compose(
-  reactReduxFirebase(firebase, rrfConfig), // firebase instance as first argument
-  // reduxFirestore(firebase) // <- needed if using firestore
-)(createStore)
-
-// Add firebase to reducers
-const rootReducer = combineReducers({
-  firebase: firebaseReducer,
-  // firestore: firestoreReducer // <- needed if using firestore
-})
-
-// Create store with reducers and initial state
-const initialState = {}
-const store = createStoreWithFirebase(rootReducer, initialState)
-
-// Setup react-redux so that connect HOC can be used
-const App = () => (
-  <Provider store={store}>
-    <Todos />
-  </Provider>
-);
-
-render(<App/>, document.getElementById('root'));
 ```
 
-The Firebase instance can then be grabbed from context within your components (`withFirebase` and `firebaseConnect` Higher Order Components provided to help):
 
-**Add Data**
+
+## Step-4 -USE
+
+importing firebase in you other components
 
 ```jsx
-import React from 'react'
-import PropTypes from 'prop-types'
-import { withFirebase } from 'react-redux-firebase'
-
-const Todos = ({ firebase }) => {
-  const sampleTodo = { text: 'Sample', done: false }
-  const pushSample = () => firebase.push('todos', sampleTodo)
-  return (
-    <div>
-      <h1>Todos</h1>
-      <ul>
-        {todosList}
-      </ul>
-      <input type="text" ref="newTodo" />
-      <button onClick={pushSample}>
-        Add
-      </button>
-    </div>
-  )
-}
-
-export default withFirebase(Todos)
-// or firebaseConnect()(Todos)
+import db from './../index.js';
 ```
 
-**Load Data (listeners automatically managed on mount/unmount)**
-
-```jsx
-import React from 'react'
-import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
-import { compose } from 'redux'
-import { firebaseConnect, isLoaded, isEmpty } from 'react-redux-firebase'
-
-const Todos = ({ todos, firebase }) => {
-  // Build Todos list if todos exist and are loaded
-  const todosList = !isLoaded(todos)
-    ? 'Loading'
-    : isEmpty(todos)
-      ? 'Todo list is empty'
-      : Object.keys(todos).map(
-          (key, id) => (
-            <TodoItem key={key} id={id} todo={todos[key]}/>
-          )
-        )
-  return (
-    <div>
-      <h1>Todos</h1>
-      <ul>
-        {todosList}
-      </ul>
-      <input type="text" ref="newTodo" />
-      <button onClick={this.handleAdd}>
-        Add
-      </button>
-    </div>
-  )
-}
-
-export default compose(
-  firebaseConnect([
-    'todos' // { path: '/todos' } // object notation
-  ]),
-  connect((state) => ({
-    todos: state.firebase.data.todos,
-    // profile: state.firebase.profile // load profile
-  }))
-)(Todos)
-```
-
-**Queries Based On Props**
-
-It is common to make a detail page that loads a single item instead of a whole list of items. A query for a specific `Todos` can be created using
-
-```jsx
-import React from 'react'
-import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
-import { compose } from 'redux'
-import { firebaseConnect, getVal } from 'react-redux-firebase'
-
-// Component enhancer that loads todo into redux then into the todo prop
-const enhance = compose(
-  firebaseConnect((props) => {
-    // Set listeners based on props (prop is route parameter from react-router in this case)
-    return [
-      { path: `todos/${props.params.todoId}` }, // create todo listener
-      // `todos/${props.params.todoId}` // equivalent string notation
-    ]
-  }),
-  connect(({ firebase }, props) => ({
-    todo: getVal(firebase, `data/todos/${props.params.todoId}`), // lodash's get can also be used
-  }))
-)
-
-const Todo = ({ todo, firebase, params }) =>
-  <div>
-    <input
-      name="isDone"
-      type="checkbox"
-      checked={todo.isDone}
-      onChange={() =>
-        firebase.update(`todos/${params.todoId}`, { done: !todo.isDone })
-      }
-    />
-    <span>{todo.label}</span>
-  </div>
-
-// Export enhanced component
-export default enhance(Todo)
-```
-
-
-**Load Data On Click**
-
-```jsx
-import React from 'react'
-import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
-import { compose } from 'redux'
-import { withFirebase, isLoaded, isEmpty } from 'react-redux-firebase'
-
-const Todos = ({ firebase }) => {
-  // Build Todos list if todos exist and are loaded
-  const todosList = !isLoaded(todos)
-    ? 'Loading'
-    : isEmpty(todos)
-      ? 'Todo list is empty'
-      : Object.keys(todos).map(
-          (key, id) => <TodoItem key={key} id={id} todo={todos[key]}/>
-        )
-  return (
-    <div>
-      <h1>Todos</h1>
-      <ul>
-        {todosList}
-      </ul>
-      <button onClick={() => firebase.watchEvent('value', 'todos')}>
-        Load Todos
-      </button>
-    </div>
-  )
-}
-
-// Export enhanced component
-export default compose(
-  withFirebase, // or firebaseConnect()
-  connect((state) => ({
-    todos: state.firebase.data.todos,
-    // profile: state.firebase.profile // load profile
-  }))
-)(Todos)
-```
 
 ## Firestore
 
@@ -294,55 +142,6 @@ An example that user Material UI built on top of the output of [create-react-app
 
 Join us on the [redux-firebase gitter](https://gitter.im/redux-firebase/Lobby).
 
-## Integrations
-
-View docs for recipes on integrations with:
-
-* [redux-firestore](http://react-redux-firebase.com/docs/firestore.html)
-* [redux-thunk](http://react-redux-firebase.com/docs/integrations/thunks.html)
-* [redux-observable](http://react-redux-firebase.com/docs/integrations/redux-observable.html)
-* [redux-saga](http://react-redux-firebase.com/docs/integrations/redux-saga.html)
-* [redux-form](http://react-redux-firebase.com/docs/integrations/redux-form.html)
-* [redux-auth-wrapper](http://react-redux-firebase.com/docs/recipes/routing.html#advanced)
-* [redux-persist](http://react-redux-firebase.com/docs/integrations/redux-persist.html)
-* [react-native](http://react-redux-firebase.com/docs/integrations/react-native.html)
-* [react-native-firebase](http://react-redux-firebase.com/docs/integrations/react-native.html#native-modules)
-
-## Starting A Project
-
-### Generator
-
-[generator-react-firebase](https://github.com/prescottprue/generator-react-firebase) is a yeoman generator uses react-redux-firebase when opting to include redux.
-
-### Complete Examples
-
-The [examples folder](/examples) contains full applications that can be copied/adapted and used as a new project.
-
-## FAQ
-
-Please visit the [FAQ section of the docs](http://docs.react-redux-firebase.com/history/v2.0.0/docs/FAQ.html)
-
-## Builds
-
-Most commonly people consume Redux Firestore as a [CommonJS module](http://webpack.github.io/docs/commonjs.html). This module is what you get when you import redux in a Webpack, Browserify, or a Node environment.
-
-If you don't use a module bundler, it's also fine. The redux-firestore npm package includes precompiled production and development [UMD builds](https://github.com/umdjs/umd) in the [dist folder](https://unpkg.com/redux-firestore@latest/dist/). They can be used directly without a bundler and are thus compatible with many popular JavaScript module loaders and environments. For example, you can drop a UMD build as a `<script>` tag on the page. The UMD builds make Redux Firestore available as a `window.ReduxFirestore` global variable.
-
-It can be imported like so:
-
-```html
-<script src="../node_modules/react-redux-firebase/dist/react-redux-firebase.min.js"></script>
-<!-- or through cdn: <script src="https://unpkg.com/react-redux-firebase@latest/dist/react-redux-firebase.min.js"></script> -->
-<script>console.log('react redux firebase:', window.ReactReduxFirebase)</script>
-```
-
-Note: In an effort to keep things simple, the wording from this explanation was modeled after [the installation section of the Redux Docs](https://redux.js.org/#installation).
-
-## Contributors
-
-This project exists thanks to all the people who contribute.
-
-<a href="https://github.com/prescottprue/react-redux-firebase/graphs/contributors"><img src="https://opencollective.com/react-redux-firebase/contributors.svg?width=890" /></a>
 
 ## Backers
 
