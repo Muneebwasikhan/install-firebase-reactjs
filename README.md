@@ -1,8 +1,6 @@
 # install-firebase-reactjs
 install firebase / firestore in react.js 
 
-# react-redux-firebase
-
 [![NPM version][npm-image]][npm-url]
 [![NPM downloads][npm-downloads-image]][npm-url]
 [![Quality][quality-image]][quality-url]
@@ -15,33 +13,22 @@ install firebase / firestore in react.js
 [![Gitter][gitter-image]][gitter-url]
 
 
-> Redux bindings for Firebase. Includes Higher Order Component (HOC) for use with React.
+> installing and setting up firebase with react.
 
-## [Demo](https://demo.react-redux-firebase.com)
+## [Demo]
 
-The [Material Example](https://github.com/prescottprue/react-redux-firebase/tree/master/examples/complete/material) is deployed to [demo.react-redux-firebase.com](https://demo.react-redux-firebase.com).
+## Step-1
 
-## Features
-- Integrated into redux
-- Out of the box support for authentication (with auto load user profile)
-- Full Firebase Platform Support Including Real Time Database, Firestore, and Storage
-- Automatic binding/unbinding of listeners through React Higher Order Components (`firebaseConnect`  and `firestoreConnect`)
-- [Population capability](http://react-redux-firebase.com/docs/populate) (similar to mongoose's `populate` or SQL's `JOIN`)
-- Support small data ( using `value` ) or large datasets ( using `child_added`, `child_removed`, `child_changed` )
-- Multiple queries types supported including `orderByChild`, `orderByKey`, `orderByValue`, `orderByPriority`, `limitToLast`, `limitToFirst`, `startAt`, `endAt`, `equalTo`
-- Tons of examples of integrations including [`redux-thunk`](https://github.com/gaearon/redux-thunk) and [`redux-observable`](https://redux-observable.js.org/)
-- Server Side Rendering Support
-- [`react-native` support](http://react-redux-firebase.com/docs/integrations/react-native.html) using [native modules](http://react-redux-firebase.com/docs/integrations/react-native.html#native-modules) or [web sdk](http://react-redux-firebase.com/docs/integrations/react-native.html#jsweb)
-
-## Installation
-
+First you should have react project for making new creact app use ,
 ```bash
-npm install --save react-redux-firebase
+creact-react-app new-project
 ```
+## Step-2
 
-This assumes you are using [npm](https://www.npmjs.com/) as your package manager.
-
-If you're not, you can access the library on [unpkg](https://unpkg.com/redux-firestore@latest/dist/redux-firestore.min.js), download it, or point your package manager to it. Theres more on this in the [Builds section below](#builds).
+Now install firebase in you react app
+```bash
+npm install firebase --save
+```
 
 ## Use
 
